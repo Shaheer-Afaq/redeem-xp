@@ -47,14 +47,19 @@ public class ItemBuilder {
         return withComponent(DataComponentTypes.CUSTOM_NAME, Text.literal(name).formatted(color));
     }
 
-    public ItemBuilder desc(String text, Formatting color) {
-        LoreComponent currentLore = stack.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT);
+    public ItemBuilder desc(String text, Formatting color, boolean replace) {
+        List<Text> lines = new ArrayList<>();
 
-        List<Text> lines = new ArrayList<>(currentLore.lines());
+        if (replace) {
+            return withComponent(DataComponentTypes.LORE, new LoreComponent());
+        } else {
+            LoreComponent currentLore = stack.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT);
+            lines.add(currentLore.lines());
+        }
+
 
         lines.add(Text.literal(text).formatted(color).styled(style -> style.withItalic(false)));
 
-        return withComponent(DataComponentTypes.LORE, new LoreComponent(lines));
     }
 
 

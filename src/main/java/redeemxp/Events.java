@@ -2,28 +2,33 @@ package redeemxp;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionPredicate;
-import net.minecraft.command.permission.Permissions;
-import net.minecraft.component.ComponentType;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.AttributeModifierSlot;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
+import net.minecraft.item.ExperienceBottleItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemStackSet;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import org.apache.logging.log4j.core.jmx.Server;
+import redeemxp.access.XPBottleEntityAccess;
 
-import java.util.Objects;
+import javax.xml.crypto.Data;
 
 import static redeemxp.Config.max_xp;
-import static redeemxp.Manager.createXPBottle;
+import static redeemxp.Config.xp_amount;
+import static redeemxp.Manager.redeem;
 
 public class Events {
     public static void register(){
@@ -32,45 +37,11 @@ public class Events {
                     .requires(source -> true)
                     .then(CommandManager.argument("xp", IntegerArgumentType.integer(1))
                         .executes(context -> {
-                            int xp = IntegerArgumentType.getInteger(context, "xp");
-
-                            ServerPlayerEntity player = context.getSource().getPlayer();
-
-                            assert player != null;
-                            ItemStack stack = player.getMainHandStack();
-                            if (stack.getComponents().contains(DataComponentTypes.CUSTOM_DATA)){
-                                NbtCompound nbt = stack.getComponents().get(DataComponentTypes.CUSTOM_DATA).copyNbt();
-                                if (nbt.contains("xp")){
-                                    int storedxp = nbt.getInt("xp").get();
-
-                                }
-                            }else{
-                                player.getInventory().insertStack(createXPBottle(xp));
-                                player.sendMessage(Text.of("Redeemed " + xp + " xp!"), false);
-                            }
-
-
-                            return 1;
+                            int value = IntegerArgumentType.getInteger(context, "xp");
+                            return redeem(context, value);
                         })
                     )
-                    .then(CommandManager.literal("max")
-                        .executes(context->{
-                            ServerPlayerEntity player = context.getSource().getPlayer();
-                            assert player != null;
-
-                            if (player.totalExperience > 0){
-                                int xp = Math.min(player.totalExperience, max_xp);
-                                player.addExperience(-xp);
-
-                                player.sendMessage(Text.literal("Redeemed " + xp + " xp!").formatted(Formatting.GOLD), false);
-                                player.getInventory().insertStack(createXPBottle(xp));
-                            }
-                            else{
-                                player.sendMessage(Text.literal("You don't have any xp!").formatted(Formatting.RED), false);
-                            }
-
-                            return 1;
-                        }))
+                    .then(CommandManager.literal("max").executes(context-> redeem(context, max_xp)))
             );
             dispatcher.register(CommandManager.literal("upgrade")
                     .requires(source -> true)
@@ -97,6 +68,39 @@ public class Events {
                         })
                     )
             );
+        });
+        UseItemCallback.EVENT.register((player, world, hand) -> {
+            if (!(world instanceof ServerWorld serverWorld)) {return ActionResult.SUCCESS;}
+
+            ItemStack stack = player.getStackInHand(hand);
+            if (stack.getItem() == Items.EXPERIENCE_BOTTLE){
+                NbtComponent customData = stack.get(DataComponentTypes.CUSTOM_DATA);
+                assert customData != null;
+                NbtCompound nbt = customData.copyNbt();
+                if (nbt.contains("xp")) {
+                    int storedxp = nbt.getInt("xp").get();
+                    ItemStack itemStack = player.getStackInHand(hand);
+
+                    world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_EXPERIENCE_BOTTLE_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+                    ExperienceBottleEntity entity = ProjectileEntity.spawnWithVelocity(ExperienceBottleEntity::new, serverWorld, itemStack, player, -20.0F, 0.7F, 1.0F);
+
+                    if (player.isSneaking()) {
+                        ((XPBottleEntityAccess) entity).setStoredXp(storedxp);
+                        stack.decrement(1);
+                    } else {
+                        int xpToThrow = Math.min(storedxp, xp_amount);
+                        ((XPBottleEntityAccess) entity).setStoredXp(xpToThrow);
+                        if (storedxp == xpToThrow) {
+                            stack.decrement(1);
+                        } else {
+                            nbt.putInt("xp", storedxp - xpToThrow);
+                            stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+                        }
+                    }
+                    return ActionResult.FAIL;
+                }
+            }
+            return ActionResult.SUCCESS;
         });
     }
 }

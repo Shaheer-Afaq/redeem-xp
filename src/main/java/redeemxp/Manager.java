@@ -1,12 +1,20 @@
 package redeemxp;
 
+import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.entity.Entity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
 
 import static redeemxp.Config.max_xp;
 
@@ -23,14 +31,77 @@ public class Manager {
         });
     }
 
+    public static int redeem(CommandContext<ServerCommandSource> context, int value) {
+        ServerPlayerEntity player = context.getSource().getPlayer();
+        if (player == null) return 0;
+        int redeemable = Math.min(Math.min(value, getTotalXp(player.experienceLevel, player.experienceProgress, player)), max_xp);
+
+        if (redeemable <= 0) {
+            player.sendMessage(Text.literal("You don't have enough XP!").formatted(Formatting.RED), false);
+            return 0;
+        }
+
+        ItemStack stack = player.getMainHandStack();
+        boolean handUpdated = false;
+
+        if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
+            NbtComponent customData = stack.get(DataComponentTypes.CUSTOM_DATA);
+            if (customData != null) {
+                NbtCompound nbt = customData.copyNbt();
+                if (nbt.contains("xp")) {
+                    int storedxp = nbt.getInt("xp").get();
+                    if (storedxp < max_xp) {
+                        int roomInBottle = max_xp - storedxp;
+                        int toAdd = Math.min(redeemable, roomInBottle);
+
+                        player.setStackInHand(Hand.MAIN_HAND, createXPBottle(storedxp + toAdd));
+                        player.addExperience(-toAdd);
+                        player.sendMessage(Text.literal("Redeemed " + toAdd + " XP into the current bottle!").formatted(Formatting.GREEN), false);
+
+                        handUpdated = true;
+                    }
+                }
+            }
+        }
+
+        if (!handUpdated) {
+            ItemStack newBottle = createXPBottle(redeemable);
+
+            if (player.getInventory().insertStack(newBottle)) {
+                player.addExperience(-redeemable);
+                player.sendMessage(Text.literal("Redeemed " + redeemable + " XP into a new bottle!").formatted(Formatting.GREEN), false);
+            } else {
+                player.dropItem(newBottle, false);
+                player.addExperience(-redeemable);
+                player.sendMessage(Text.literal("Redeemed " + redeemable + " XP into a new bottle!").formatted(Formatting.GREEN), false);
+            }
+        }
+        return 1;
+    }
+
     public static ItemStack createXPBottle(int value){
         return new ItemBuilder(new ItemStack(Items.EXPERIENCE_BOTTLE))
                 .setStackSize(1)
+                .desc(value + "/" + max_xp + " XP", Formatting.GRAY)
+                .name("XP Bottle " + value + "/" + max_xp, Formatting.GOLD)
                 .withNbt(nbt -> {
                     nbt.putInt("xp", value);
                 })
-                .desc(value + "/" + max_xp + " XP", Formatting.GRAY)
-                .name("XP Bottle", Formatting.GOLD)
+                .withComponent(DataComponentTypes.BASE_COLOR, DyeColor.BLUE)
                 .build();
+    }
+    public static int getTotalXp(int level, float progress, ServerPlayerEntity player) {
+        int xpFromLevels;
+        if (level <= 16) {
+            xpFromLevels = level * level + 6 * level;
+        } else if (level <= 31) {
+            xpFromLevels = (int) (2.5 * level * level - 40.5 * level + 360);
+        } else {
+            xpFromLevels = (int) (4.5 * level * level - 162.5 * level + 2220);
+        }
+
+        int xpFromProgress = Math.round(progress * player.getNextLevelExperience());
+
+        return xpFromLevels + xpFromProgress;
     }
 }
