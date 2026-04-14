@@ -1,14 +1,15 @@
 {
-	"required": true,
-	"package": "redeem.xp.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ExampleMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+  "required": true,
+  "package": "redeemxp.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "XPBottleEntityMixin",
+    "XPBottleItemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
 	}
 }

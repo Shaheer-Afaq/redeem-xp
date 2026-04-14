@@ -16,10 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"redeem.xp.RedeemXP"
+          "redeemxp.RedeemXP"
 		],
 		"client": [
-			"redeem.xp.client.RedeemXPClient"
+          "redeemxp.client.RedeemXPClient"
 		]
 	},
 	"mixins": [

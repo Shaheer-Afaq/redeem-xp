@@ -1,4 +1,4 @@
-package redeem.xp.client;
+package redeemxp.client;
 
 import net.fabricmc.api.ClientModInitializer;
 
