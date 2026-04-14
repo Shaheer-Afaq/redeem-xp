@@ -11,9 +11,8 @@ public class RedeemXP implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		Events.register();
-		Config.init();
 		Manager.init();
-		LOGGER.info("Hello Fabric world!");
+		Events.register();
+		LOGGER.info("Loaded RedeemXP");
 	}
 }

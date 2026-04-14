@@ -5,10 +5,8 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.thrown.ExperienceBottleEntity;
-import net.minecraft.item.ExperienceBottleItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -16,15 +14,8 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import org.apache.logging.log4j.core.jmx.Server;
 import redeemxp.access.XPBottleEntityAccess;
-
-import javax.xml.crypto.Data;
 
 import static redeemxp.Config.max_xp;
 import static redeemxp.Config.xp_amount;
@@ -69,6 +60,7 @@ public class Events {
                     )
             );
         });
+
         UseItemCallback.EVENT.register((player, world, hand) -> {
             if (!(world instanceof ServerWorld serverWorld)) {return ActionResult.SUCCESS;}
 

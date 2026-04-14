@@ -14,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import redeemxp.access.XPBottleEntityAccess;
 
-import static redeemxp.Manager.getWorld;
-
 @Mixin(ExperienceBottleEntity.class)
 public abstract class XPBottleEntityMixin extends Entity implements XPBottleEntityAccess {
 

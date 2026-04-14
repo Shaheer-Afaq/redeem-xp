@@ -67,14 +67,11 @@ public class Manager {
         if (!handUpdated) {
             ItemStack newBottle = createXPBottle(redeemable);
 
-            if (player.getInventory().insertStack(newBottle)) {
-                player.addExperience(-redeemable);
-                player.sendMessage(Text.literal("Redeemed " + redeemable + " XP into a new bottle!").formatted(Formatting.GREEN), false);
-            } else {
+            if (!player.getInventory().insertStack(newBottle)) {
                 player.dropItem(newBottle, false);
-                player.addExperience(-redeemable);
-                player.sendMessage(Text.literal("Redeemed " + redeemable + " XP into a new bottle!").formatted(Formatting.GREEN), false);
             }
+            player.addExperience(-redeemable);
+            player.sendMessage(Text.literal("Redeemed " + redeemable + " XP into a new bottle!").formatted(Formatting.GREEN), false);
         }
         return 1;
     }
@@ -82,12 +79,10 @@ public class Manager {
     public static ItemStack createXPBottle(int value){
         return new ItemBuilder(new ItemStack(Items.EXPERIENCE_BOTTLE))
                 .setStackSize(1)
-                .desc(value + "/" + max_xp + " XP", Formatting.GRAY)
-                .name("XP Bottle " + value + "/" + max_xp, Formatting.GOLD)
-                .withNbt(nbt -> {
-                    nbt.putInt("xp", value);
-                })
-                .withComponent(DataComponentTypes.BASE_COLOR, DyeColor.BLUE)
+                .setLore(value + "/" + max_xp + " XP", Formatting.GRAY, true)
+                .setName("XP Bottle " + value + "/" + max_xp, Formatting.GOLD)
+                .setNbt(nbt -> nbt.putInt("xp", value))
+                .setComponent(DataComponentTypes.BASE_COLOR, DyeColor.BLUE)
                 .build();
     }
     public static int getTotalXp(int level, float progress, ServerPlayerEntity player) {

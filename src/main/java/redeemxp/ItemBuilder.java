@@ -11,7 +11,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.TypedEntityData;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.equipment.trim.ArmorTrim;
 import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
@@ -38,56 +37,53 @@ public class ItemBuilder {
         this.stack = stack;
     }
 
-    public <T> ItemBuilder withComponent(ComponentType<T> type, T value) {
+    public <T> ItemBuilder setComponent(ComponentType<T> type, T value) {
         stack.set(type, value);
         return this;
     }
 
-    public ItemBuilder name(String name, Formatting color) {
-        return withComponent(DataComponentTypes.CUSTOM_NAME, Text.literal(name).formatted(color));
+    public ItemBuilder setName(String name, Formatting color) {
+        return setComponent(DataComponentTypes.CUSTOM_NAME, Text.literal(name).formatted(color));
     }
 
-    public ItemBuilder desc(String text, Formatting color, boolean replace) {
+    public ItemBuilder setLore(String text, Formatting color, boolean replace) {
         List<Text> lines = new ArrayList<>();
-
-        if (replace) {
-            return withComponent(DataComponentTypes.LORE, new LoreComponent());
-        } else {
-            LoreComponent currentLore = stack.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT);
-            lines.add(currentLore.lines());
+        if (!replace){
+            lines = stack.getOrDefault(DataComponentTypes.LORE, LoreComponent.DEFAULT).lines();
         }
-
-
-        lines.add(Text.literal(text).formatted(color).styled(style -> style.withItalic(false)));
-
+        lines.add(Text.literal(text).formatted(color));
+        return setComponent(DataComponentTypes.LORE, new LoreComponent(lines));
     }
 
+    public ItemBuilder setNbt(Consumer<NbtCompound> nbtModifier) {
+        NbtCompound nbt = new NbtCompound();
+        nbtModifier.accept(nbt);
+        return setComponent(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+    }
 
-    public ItemBuilder withEnchant(RegistryKey<Enchantment> enchantment, int level) {
+    public ItemBuilder setMaxDura(int amount) {
+        return setComponent(DataComponentTypes.MAX_DAMAGE, amount);
+    }
+
+    public ItemBuilder setStackSize(int max_stack_size){
+        return setComponent(DataComponentTypes.MAX_STACK_SIZE, max_stack_size);
+    }
+
+    public ItemBuilder setEntityData(EntityType<?> type, Consumer<NbtCompound> nbtModifier) {
+        NbtCompound nbt = new NbtCompound();
+        nbtModifier.accept(nbt);
+        TypedEntityData<EntityType<?>> typedData = TypedEntityData.create(type, NbtComponent.of(nbt).copyNbt());
+
+        return setComponent(DataComponentTypes.ENTITY_DATA, typedData);
+    }
+
+    public ItemBuilder addEnchant(RegistryKey<Enchantment> enchantment, int level) {
         Registry<Enchantment> registry = getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
         stack.addEnchantment(registry.getOrThrow(enchantment), level);
         return this;
     }
 
-    public ItemBuilder maxDura(int amount) {
-        return withComponent(DataComponentTypes.MAX_DAMAGE, amount);
-    }
-
-    public ItemBuilder withEntityData(EntityType<?> type, Consumer<NbtCompound> nbtModifier) {
-        NbtCompound nbt = new NbtCompound();
-        nbtModifier.accept(nbt);
-        TypedEntityData<EntityType<?>> typedData = TypedEntityData.create(type, NbtComponent.of(nbt).copyNbt());
-
-        return withComponent(DataComponentTypes.ENTITY_DATA, typedData);
-    }
-
-    public ItemBuilder withNbt(Consumer<NbtCompound> nbtModifier) {
-        NbtCompound nbt = new NbtCompound();
-        nbtModifier.accept(nbt);
-        return withComponent(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
-    }
-
-    public ItemBuilder withAttribute(RegistryEntry<EntityAttribute> attribute, double amount, EntityAttributeModifier.Operation operation, AttributeModifierSlot slot) {
+    public ItemBuilder addAttribute(RegistryEntry<EntityAttribute> attribute, double amount, EntityAttributeModifier.Operation operation, AttributeModifierSlot slot) {
         AttributeModifiersComponent current = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
 
         EntityAttributeModifier modifier = new EntityAttributeModifier(
@@ -96,14 +92,10 @@ public class ItemBuilder {
                                 .orElse("unknown")),
                 amount, operation);
 
-        return withComponent(DataComponentTypes.ATTRIBUTE_MODIFIERS, current.with(attribute, modifier, slot));
+        return setComponent(DataComponentTypes.ATTRIBUTE_MODIFIERS, current.with(attribute, modifier, slot));
     }
 
-    public ItemBuilder setStackSize(int max_stack_size){
-        return withComponent(DataComponentTypes.MAX_STACK_SIZE, max_stack_size);
-    }
-
-    public ItemBuilder withTrim(RegistryKey<ArmorTrimPattern> patternKey, RegistryKey<ArmorTrimMaterial> materialKey) {
+    public ItemBuilder setTrim(RegistryKey<ArmorTrimPattern> patternKey, RegistryKey<ArmorTrimMaterial> materialKey) {
         var rm = getWorld().getRegistryManager();
 
         ArmorTrim trim = new ArmorTrim(
@@ -111,7 +103,7 @@ public class ItemBuilder {
                 rm.getOrThrow(RegistryKeys.TRIM_PATTERN).getOrThrow(patternKey)
         );
 
-        return withComponent(DataComponentTypes.TRIM, trim);
+        return setComponent(DataComponentTypes.TRIM, trim);
     }
 
     public ItemStack build() {
