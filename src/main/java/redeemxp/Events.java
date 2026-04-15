@@ -19,6 +19,7 @@ import redeemxp.access.XPBottleEntityAccess;
 
 import static redeemxp.Config.max_xp;
 import static redeemxp.Config.xp_amount;
+import static redeemxp.Manager.updateXPBottle;
 import static redeemxp.Manager.redeem;
 
 public class Events {
@@ -79,14 +80,16 @@ public class Events {
                     if (player.isSneaking()) {
                         ((XPBottleEntityAccess) entity).setStoredXp(storedxp);
                         stack.decrement(1);
+                        world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_BREAK.value(), SoundCategory.PLAYERS);
                     } else {
                         int xpToThrow = Math.min(storedxp, xp_amount);
                         ((XPBottleEntityAccess) entity).setStoredXp(xpToThrow);
                         if (storedxp == xpToThrow) {
                             stack.decrement(1);
+                            world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_BREAK.value(), SoundCategory.PLAYERS);
+
                         } else {
-                            nbt.putInt("xp", storedxp - xpToThrow);
-                            stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+                            updateXPBottle(stack, storedxp-xpToThrow);
                         }
                     }
                     return ActionResult.FAIL;

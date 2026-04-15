@@ -64,6 +64,9 @@ public class ItemBuilder {
     public ItemBuilder setMaxDura(int amount) {
         return setComponent(DataComponentTypes.MAX_DAMAGE, amount);
     }
+    public ItemBuilder setDura(int amount) {
+        return setComponent(DataComponentTypes.DAMAGE, amount);
+    }
 
     public ItemBuilder setStackSize(int max_stack_size){
         return setComponent(DataComponentTypes.MAX_STACK_SIZE, max_stack_size);

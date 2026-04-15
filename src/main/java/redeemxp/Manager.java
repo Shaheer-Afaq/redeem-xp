@@ -3,7 +3,11 @@ package redeemxp;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -54,7 +58,9 @@ public class Manager {
                         int roomInBottle = max_xp - storedxp;
                         int toAdd = Math.min(redeemable, roomInBottle);
 
-                        player.setStackInHand(Hand.MAIN_HAND, createXPBottle(storedxp + toAdd));
+                        ItemStack newBottle = new ItemStack(Items.EXPERIENCE_BOTTLE);
+                        updateXPBottle(newBottle, storedxp + toAdd);
+                        player.setStackInHand(Hand.MAIN_HAND, newBottle);
                         player.addExperience(-toAdd);
                         player.sendMessage(Text.literal("Redeemed " + toAdd + " XP into the current bottle!").formatted(Formatting.GREEN), false);
 
@@ -65,7 +71,8 @@ public class Manager {
         }
 
         if (!handUpdated) {
-            ItemStack newBottle = createXPBottle(redeemable);
+            ItemStack newBottle = new ItemStack(Items.EXPERIENCE_BOTTLE);
+            updateXPBottle(newBottle, redeemable);
 
             if (!player.getInventory().insertStack(newBottle)) {
                 player.dropItem(newBottle, false);
@@ -76,14 +83,13 @@ public class Manager {
         return 1;
     }
 
-    public static ItemStack createXPBottle(int value){
-        return new ItemBuilder(new ItemStack(Items.EXPERIENCE_BOTTLE))
-                .setStackSize(1)
-                .setLore(value + "/" + max_xp + " XP", Formatting.GRAY, true)
-                .setName("XP Bottle " + value + "/" + max_xp, Formatting.GOLD)
-                .setNbt(nbt -> nbt.putInt("xp", value))
-                .setComponent(DataComponentTypes.BASE_COLOR, DyeColor.BLUE)
-                .build();
+    public static void updateXPBottle(ItemStack xpbottle, int value){
+        new ItemBuilder(xpbottle)
+            .setStackSize(1)
+            .setName("Bottle o' Enchanting", Formatting.LIGHT_PURPLE)
+            .setLore(value + "/" + max_xp + " XP", Formatting.GRAY, true)
+            .setNbt(nbt -> nbt.putInt("xp", value))
+            .setMaxDura(max_xp).setDura(max_xp - value);
     }
     public static int getTotalXp(int level, float progress, ServerPlayerEntity player) {
         int xpFromLevels;
