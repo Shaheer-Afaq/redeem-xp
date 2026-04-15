@@ -89,7 +89,8 @@ public class Manager {
             .setName("Bottle o' Enchanting", Formatting.LIGHT_PURPLE)
             .setLore(value + "/" + max_xp + " XP", Formatting.GRAY, true)
             .setNbt(nbt -> nbt.putInt("xp", value))
-            .setMaxDura(max_xp).setDura(max_xp - value);
+            .setMaxDura(max_xp).setDura(max_xp - value)
+            .setComponent(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
     public static int getTotalXp(int level, float progress, ServerPlayerEntity player) {
         int xpFromLevels;
@@ -101,7 +102,7 @@ public class Manager {
             xpFromLevels = (int) (4.5 * level * level - 162.5 * level + 2220);
         }
 
-        int xpFromProgress = Math.round(progress * player.getNextLevelExperience());
+        int xpFromProgress = (int) (player.experienceProgress * player.getNextLevelExperience());
 
         return xpFromLevels + xpFromProgress;
     }

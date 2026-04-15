@@ -3,7 +3,7 @@
   "package": "redeemxp.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "XPBottleEntityMixin",
+    "XPBottleEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
