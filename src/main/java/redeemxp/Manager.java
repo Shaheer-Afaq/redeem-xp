@@ -47,12 +47,13 @@ public class Manager {
                 NbtCompound nbt = customData.copyNbt();
                 if (nbt.contains("xp")) {
                     int storedxp = nbt.getInt("xp").get();
+                    int max_xp = nbt.getInt("max_xp").get();
                     if (storedxp < RedeemXP.CONFIG.max_xp()) {
                         int roomInBottle = RedeemXP.CONFIG.max_xp() - storedxp;
                         int toAdd = Math.min(redeemable, roomInBottle);
 
                         ItemStack newBottle = new ItemStack(Items.EXPERIENCE_BOTTLE);
-                        updateXPBottle(newBottle, storedxp + toAdd);
+                        updateXPBottle(newBottle, storedxp + toAdd, max_xp, "Bottle o' Enchanting");
                         player.setStackInHand(Hand.MAIN_HAND, newBottle);
                         player.addExperience(-toAdd);
                         player.sendMessage(Text.literal("Redeemed " + toAdd + " XP into the current bottle!").formatted(Formatting.GREEN), false);
@@ -65,7 +66,7 @@ public class Manager {
 
         if (!handUpdated) {
             ItemStack newBottle = new ItemStack(Items.EXPERIENCE_BOTTLE);
-            updateXPBottle(newBottle, redeemable);
+            updateXPBottle(newBottle, redeemable, RedeemXP.CONFIG.max_xp(), "Bottle o' Enchanting");
 
             if (!player.getInventory().insertStack(newBottle)) {
                 player.dropItem(newBottle, false);
@@ -76,13 +77,16 @@ public class Manager {
         return 1;
     }
 
-    public static void updateXPBottle(ItemStack xpbottle, int value){
+    public static void updateXPBottle(ItemStack xpbottle, int value, int max_xp, String name){
         new ItemBuilder(xpbottle)
             .setStackSize(1)
-            .setName("Bottle o' Enchanting", Formatting.LIGHT_PURPLE)
-            .setLore(value + "/" + RedeemXP.CONFIG.max_xp() + " XP", Formatting.GRAY, true)
-            .setNbt(nbt -> nbt.putInt("xp", value))
-            .setMaxDura(RedeemXP.CONFIG.max_xp()).setDura(RedeemXP.CONFIG.max_xp() - value)
+            .setName(name, Formatting.LIGHT_PURPLE)
+            .setLore(value + "/" + max_xp + " XP", Formatting.GRAY, true)
+            .setNbt(nbt -> {
+                nbt.putInt("xp", value);
+                nbt.putInt("max_xp", max_xp);
+            })
+            .setMaxDura(max_xp).setDura(max_xp - value)
             .setComponent(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
     public static int getTotalXp(int level, float progress) {

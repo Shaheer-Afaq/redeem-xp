@@ -3,5 +3,7 @@
   "text.config.redeemxp.option.max_xp.tooltip" : "The maximum xp a bottle can store",
   "text.config.redeemxp.option.xp_rate" : "XP Rate (1-1000000)",
   "text.config.redeemxp.option.xp_rate.tooltip" : "How much xp is thrown at each use",
+  "text.config.redeemxp.option.xp_percentage_on_death" : "Death drop percentage (0-100)",
+  "text.config.redeemxp.option.xp_percentage_on_death.tooltip" : "How much xp is conserved in a bottle on death",
   "text.config.redeemxp.title" : "Redeem XP"
 }

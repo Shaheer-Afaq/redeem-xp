@@ -60,6 +60,7 @@ public class Events {
                     NbtCompound nbt = customData.copyNbt();
                     if (nbt.contains("xp")) {
                         int storedxp = nbt.getInt("xp").get();
+                        int max_xp = nbt.getInt("max_xp").get();
                         ItemStack itemStack = player.getStackInHand(hand);
 
                         world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_EXPERIENCE_BOTTLE_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
@@ -77,7 +78,7 @@ public class Events {
                                 world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_BREAK.value(), SoundCategory.PLAYERS);
 
                             } else {
-                                updateXPBottle(stack, storedxp - xpToThrow);
+                                updateXPBottle(stack, storedxp - xpToThrow, max_xp, "Bottle o' Enchanting");
                             }
                         }
                         return ActionResult.SUCCESS;
