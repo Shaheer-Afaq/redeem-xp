@@ -5,13 +5,13 @@
 	"name": "Redeem XP",
 	"description": "Redeem and store xp with a simple command!",
 	"authors": [
-		"Me!"
+		"Quite_Kid"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/Shaheer-Afaq/redeem-xp"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/redeem-xp/icon.png",
 	"environment": "*",
 	"entrypoints": {

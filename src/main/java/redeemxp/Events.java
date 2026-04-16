@@ -15,7 +15,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import redeemxp.access.XPBottleEntityAccess;
 
 import static redeemxp.Manager.*;
@@ -46,6 +48,17 @@ public class Events {
                         )
                     )
                     .then(CommandManager.literal("max").executes(context-> redeem(context, RedeemXP.CONFIG.max_xp())))
+            );
+            dispatcher.register(CommandManager.literal("xpstats")
+                    .requires(source -> true)
+                    .executes(context->{
+                        ServerPlayerEntity  player = context.getSource().getPlayer();
+                        if (player != null) {
+                            player.sendMessage(Text.literal("Total XP: " + getTotalXp(player.experienceLevel, player.experienceProgress)).formatted(Formatting.GREEN), false);
+                            return 1;
+                        }
+                        return 0;
+                    })
             );
         });
 
