@@ -3,11 +3,7 @@ package redeemxp;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -16,11 +12,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-
-import static redeemxp.Config.max_xp;
 
 public class Manager {
     private static MinecraftServer Server;
@@ -38,7 +31,7 @@ public class Manager {
     public static int redeem(CommandContext<ServerCommandSource> context, int value) {
         ServerPlayerEntity player = context.getSource().getPlayer();
         if (player == null) return 0;
-        int redeemable = Math.min(Math.min(value, getTotalXp(player.experienceLevel, player.experienceProgress, player)), max_xp);
+        int redeemable = Math.min(Math.min(value, getTotalXp(player.experienceLevel, player.experienceProgress)), RedeemXP.CONFIG.max_xp());
 
         if (redeemable <= 0) {
             player.sendMessage(Text.literal("You don't have enough XP!").formatted(Formatting.RED), false);
@@ -54,8 +47,8 @@ public class Manager {
                 NbtCompound nbt = customData.copyNbt();
                 if (nbt.contains("xp")) {
                     int storedxp = nbt.getInt("xp").get();
-                    if (storedxp < max_xp) {
-                        int roomInBottle = max_xp - storedxp;
+                    if (storedxp < RedeemXP.CONFIG.max_xp()) {
+                        int roomInBottle = RedeemXP.CONFIG.max_xp() - storedxp;
                         int toAdd = Math.min(redeemable, roomInBottle);
 
                         ItemStack newBottle = new ItemStack(Items.EXPERIENCE_BOTTLE);
@@ -87,23 +80,28 @@ public class Manager {
         new ItemBuilder(xpbottle)
             .setStackSize(1)
             .setName("Bottle o' Enchanting", Formatting.LIGHT_PURPLE)
-            .setLore(value + "/" + max_xp + " XP", Formatting.GRAY, true)
+            .setLore(value + "/" + RedeemXP.CONFIG.max_xp() + " XP", Formatting.GRAY, true)
             .setNbt(nbt -> nbt.putInt("xp", value))
-            .setMaxDura(max_xp).setDura(max_xp - value)
+            .setMaxDura(RedeemXP.CONFIG.max_xp()).setDura(RedeemXP.CONFIG.max_xp() - value)
             .setComponent(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
     }
-    public static int getTotalXp(int level, float progress, ServerPlayerEntity player) {
-        int xpFromLevels;
+    public static int getTotalXp(int level, float progress) {
+        long xpFromLevels;
         if (level <= 16) {
-            xpFromLevels = level * level + 6 * level;
+            xpFromLevels = (long) level * level + 6L * level;
         } else if (level <= 31) {
-            xpFromLevels = (int) (2.5 * level * level - 40.5 * level + 360);
+            xpFromLevels = (long) (2.5 * level * level - 40.5 * level + 360);
         } else {
-            xpFromLevels = (int) (4.5 * level * level - 162.5 * level + 2220);
+            xpFromLevels = (long) (4.5 * level * level - 162.5 * level + 2220);
         }
+        int nextLevelExperience;
+        if (level >= 30) {
+            nextLevelExperience =  112 + (level - 30) * 9;
+        } else {
+            nextLevelExperience =  level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2;
+        }
+        int xpFromProgress = (int) (progress * nextLevelExperience);
 
-        int xpFromProgress = (int) (player.experienceProgress * player.getNextLevelExperience());
-
-        return xpFromLevels + xpFromProgress;
+        return (int) Math.min(xpFromLevels + xpFromProgress, Integer.MAX_VALUE);
     }
 }

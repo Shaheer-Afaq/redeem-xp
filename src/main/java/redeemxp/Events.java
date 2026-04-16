@@ -18,8 +18,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import redeemxp.access.XPBottleEntityAccess;
 
-import static redeemxp.Config.max_xp;
-import static redeemxp.Config.xp_amount;
 import static redeemxp.Manager.*;
 
 public class Events {
@@ -28,10 +26,12 @@ public class Events {
             dispatcher.register(CommandManager.literal("redeem")
                     .requires(source -> true)
                     .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
-                        .executes(context -> {
-                            int amount = IntegerArgumentType.getInteger(context, "amount");
-                            return redeem(context, amount);
-                        })
+                        .then(CommandManager.literal("xp")
+                            .executes(context -> {
+                                int amount = IntegerArgumentType.getInteger(context, "amount");
+                                return redeem(context, amount);
+                            })
+                        )
                     )
                     .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
                         .then(CommandManager.literal("levels")
@@ -40,12 +40,12 @@ public class Events {
                                 assert player != null;
                                 int amount = IntegerArgumentType.getInteger(context, "amount");
                                 int currentLevels = player.experienceLevel;
-                                int xp = getTotalXp(currentLevels, player.experienceProgress, player) - getTotalXp(currentLevels-amount, player.experienceProgress, player);
+                                int xp = getTotalXp(currentLevels, player.experienceProgress) - getTotalXp(currentLevels-amount, player.experienceProgress);
                                 return redeem(context, xp);
                             })
                         )
                     )
-                    .then(CommandManager.literal("max").executes(context-> redeem(context, max_xp)))
+                    .then(CommandManager.literal("max").executes(context-> redeem(context, RedeemXP.CONFIG.max_xp())))
             );
         });
 
@@ -70,7 +70,7 @@ public class Events {
                             stack.decrement(1);
                             world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_BREAK.value(), SoundCategory.PLAYERS);
                         } else {
-                            int xpToThrow = Math.min(storedxp, xp_amount);
+                            int xpToThrow = Math.min(storedxp, RedeemXP.CONFIG.xp_rate());
                             ((XPBottleEntityAccess) entity).setStoredXp(xpToThrow);
                             if (storedxp == xpToThrow) {
                                 stack.decrement(1);

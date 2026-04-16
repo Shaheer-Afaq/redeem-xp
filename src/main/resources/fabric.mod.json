@@ -3,7 +3,7 @@
 	"id": "redeemxp",
 	"version": "${version}",
 	"name": "Redeem XP",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Redeem and store xp with a simple command!",
 	"authors": [
 		"Me!"
 	],
