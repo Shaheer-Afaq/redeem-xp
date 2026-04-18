@@ -49,16 +49,32 @@ public class Events {
                     )
                     .then(CommandManager.literal("max").executes(context-> redeem(context, RedeemXP.CONFIG.max_xp())))
             );
-            dispatcher.register(CommandManager.literal("xpstats")
-                    .requires(source -> true)
-                    .executes(context->{
-                        ServerPlayerEntity  player = context.getSource().getPlayer();
-                        if (player != null) {
-                            player.sendMessage(Text.literal("Total XP: " + getTotalXp(player.experienceLevel, player.experienceProgress)).formatted(Formatting.GREEN), false);
-                            return 1;
-                        }
-                        return 0;
-                    })
+            dispatcher.register(CommandManager.literal("xpinfo")
+                .requires(source -> true)
+                    .then(CommandManager.literal("totalxp")
+                        .executes(context->{
+                            ServerPlayerEntity  player = context.getSource().getPlayer();
+                            if (player != null) {
+                                player.sendMessage(Text.literal("Total XP: " + getTotalXp(player.experienceLevel, player.experienceProgress)).formatted(Formatting.GREEN), false);
+                                return 1;
+                            }
+                            return 0;
+                        })
+                    )
+                    .then(CommandManager.literal("xplevels")
+                        .then(CommandManager.argument("levels", IntegerArgumentType.integer(1))
+                            .executes(context->{
+                                ServerPlayerEntity  player = context.getSource().getPlayer();
+                                if (player != null) {
+                                    int amount = IntegerArgumentType.getInteger(context, "levels");
+                                    int diff = getTotalXp(amount, 0) - getTotalXp(player.experienceLevel, player.experienceProgress);
+                                    player.sendMessage(Text.literal("You need " + diff + " xp to reach " + amount + " levels").formatted(Formatting.GREEN), false);
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                        )
+                    )
             );
         });
 

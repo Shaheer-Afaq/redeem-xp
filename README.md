@@ -22,7 +22,9 @@ The stored xp can be monitored by the durability bar or the description.
 On death, the player drops a bottle containing a fraction of their xp. This can be configured under `xp_percentage_on_death : 50`.
 
 ---
-Run `/xpstats` to get your total xp points.
+Run `/xpinfo totalxp` to get your total xp points.
+
+Run `/xpinfo xplevels <levels>` to get the xp points required to reach that level.
 
 ---
 For the config file to appear load and run the mod once, then u can change the values in `/config/redeemxp.json5`
@@ -36,7 +38,9 @@ If you are on singleplayer you can use Mod Menu to configure the values.
 
 `/redeem max`
 
-`/xpstats`
+`/xpinfo totalxp`
+
+`/xpinfo xplevels <levels>`
 
 `xp_rate : 10`
 

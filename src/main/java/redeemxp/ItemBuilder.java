@@ -28,7 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static redeemxp.Manager.getWorld;
+import static redeemxp.Manager.getServer;
+import static redeemxp.RedeemXP.MOD_ID;
 
 public class ItemBuilder {
     private final ItemStack stack;
@@ -56,7 +57,14 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setNbt(Consumer<NbtCompound> nbtModifier) {
-        NbtCompound nbt = new NbtCompound();
+        NbtCompound nbt;
+        if (this.stack.contains(DataComponentTypes.CUSTOM_DATA)){
+            nbt = this.stack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
+        }
+        else{
+            nbt = new NbtCompound();
+        }
+
         nbtModifier.accept(nbt);
         return setComponent(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
     }
@@ -64,6 +72,7 @@ public class ItemBuilder {
     public ItemBuilder setMaxDura(int amount) {
         return setComponent(DataComponentTypes.MAX_DAMAGE, amount);
     }
+
     public ItemBuilder setDura(int amount) {
         return setComponent(DataComponentTypes.DAMAGE, amount);
     }
@@ -81,7 +90,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addEnchant(RegistryKey<Enchantment> enchantment, int level) {
-        Registry<Enchantment> registry = getWorld().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> registry = getServer().getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
         stack.addEnchantment(registry.getOrThrow(enchantment), level);
         return this;
     }
@@ -90,7 +99,7 @@ public class ItemBuilder {
         AttributeModifiersComponent current = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
 
         EntityAttributeModifier modifier = new EntityAttributeModifier(
-                Identifier.of("chaos",
+                Identifier.of(MOD_ID,
                         attribute.getKey().map(key -> key.getValue().getPath())
                                 .orElse("unknown")),
                 amount, operation);
@@ -99,7 +108,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setTrim(RegistryKey<ArmorTrimPattern> patternKey, RegistryKey<ArmorTrimMaterial> materialKey) {
-        var rm = getWorld().getRegistryManager();
+        var rm = getServer().getRegistryManager();
 
         ArmorTrim trim = new ArmorTrim(
                 rm.getOrThrow(RegistryKeys.TRIM_MATERIAL).getOrThrow(materialKey),
