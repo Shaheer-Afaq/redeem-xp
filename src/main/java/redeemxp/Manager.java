@@ -73,14 +73,11 @@ public class Manager {
 
     public static void updateXPBottle(ItemStack xpbottle, int xp, int max_xp, String name){
         new ItemBuilder(xpbottle)
-            .setStackSize(1)
-            .setName(name, Formatting.LIGHT_PURPLE)
+            .setStackSize(1).setName(name, Formatting.LIGHT_PURPLE)
             .setLore(xp + "/" + max_xp + " XP", Formatting.GRAY, true)
             .setNbt(nbt -> nbt.putInt("xp", xp))
             .setNbt(nbt -> nbt.putInt("max_xp", max_xp))
-            .setMaxDura(max_xp).setDura(max_xp - xp)
-            .addEnchant(Enchantments.MENDING, 4)
-            .setComponent(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+            .setMaxDura(max_xp).setDura(max_xp - xp);
     }
     public static int getTotalXp(int level, float progress) {
         long xpFromLevels;
