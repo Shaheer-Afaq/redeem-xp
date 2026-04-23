@@ -1,6 +1,8 @@
 package redeemxp;
 
 import com.mojang.brigadier.context.CommandContext;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -14,10 +16,15 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+
+import static redeemxp.RedeemXP.MOD_ID;
 
 public class Manager {
     private static MinecraftServer Server;
     public static MinecraftServer getServer(){return Server;}
+
+    public static final AttachmentType<Integer> ENTITY_STOREDXP = AttachmentRegistry.create(Identifier.of(MOD_ID, "stored_xp"));
 
     public static void init() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
@@ -28,15 +35,16 @@ public class Manager {
     public static int redeem(CommandContext<ServerCommandSource> context, int value) {
         ServerPlayerEntity player = context.getSource().getPlayer();
         if (player == null) return 0;
-        int redeemable = Math.min(Math.min(value, getTotalXp(player.experienceLevel, player.experienceProgress)), RedeemXP.CONFIG.max_xp());
 
-        if (redeemable <= 0) {
+        ItemStack stack = player.getMainHandStack();
+        boolean handUpdated = false;
+
+        if (getTotalXp(player.experienceLevel, player.experienceProgress) <= 0) {
             player.sendMessage(Text.literal("You don't have enough XP!").formatted(Formatting.RED), false);
             return 0;
         }
 
-        ItemStack stack = player.getMainHandStack();
-        boolean handUpdated = false;
+        int redeemable = Math.min(value, getTotalXp(player.experienceLevel, player.experienceProgress));
 
         if (stack.contains(DataComponentTypes.CUSTOM_DATA)) {
             NbtComponent customData = stack.get(DataComponentTypes.CUSTOM_DATA);
@@ -44,11 +52,13 @@ public class Manager {
                 NbtCompound nbt = customData.copyNbt();
                 if (nbt.contains("xp")) {
                     int storedxp = nbt.getInt("xp").get();
-                    int max_xp = nbt.getInt("max_xp").get();
-                    if (storedxp < RedeemXP.CONFIG.max_xp()) {
-                        int roomInBottle = RedeemXP.CONFIG.max_xp() - storedxp;
+                    int maxxp = nbt.getInt("max_xp").get();
+//                    redeemable = Math.min(redeemable, maxxp-storedxp);
+
+                    if (storedxp < maxxp) {
+                        int roomInBottle = maxxp - storedxp;
                         int toAdd = Math.min(redeemable, roomInBottle);
-                        updateXPBottle(stack, storedxp + toAdd, max_xp, "Bottle o' Enchanting");
+                        updateXPBottle(stack, storedxp + toAdd, maxxp, "Bottle o' Enchanting");
                         player.addExperience(-toAdd);
                         player.sendMessage(Text.literal("Redeemed " + toAdd + " XP into the current bottle!").formatted(Formatting.GREEN), false);
 

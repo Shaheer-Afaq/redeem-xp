@@ -18,7 +18,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
-import redeemxp.access.XPBottleEntityAccess;
 
 import static redeemxp.Manager.*;
 
@@ -96,12 +95,12 @@ public class Events {
                         ExperienceBottleEntity entity = ProjectileEntity.spawnWithVelocity(ExperienceBottleEntity::new, serverWorld, itemStack, player, -20.0F, 0.7F, 1.0F);
 
                         if (player.isSneaking()) {
-                            ((XPBottleEntityAccess) entity).setStoredXp(storedxp);
+                            entity.setAttached(ENTITY_STOREDXP, storedxp);
                             stack.decrement(1);
                             world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_BREAK.value(), SoundCategory.PLAYERS);
                         } else {
                             int xpToThrow = Math.min(storedxp, RedeemXP.CONFIG.xp_rate());
-                            ((XPBottleEntityAccess) entity).setStoredXp(xpToThrow);
+                            entity.setAttached(ENTITY_STOREDXP, xpToThrow);
                             if (storedxp == xpToThrow) {
                                 stack.decrement(1);
                                 world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_BREAK.value(), SoundCategory.PLAYERS);
