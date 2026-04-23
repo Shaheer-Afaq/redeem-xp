@@ -53,7 +53,6 @@ public class Manager {
                 if (nbt.contains("xp")) {
                     int storedxp = nbt.getInt("xp").get();
                     int maxxp = nbt.getInt("max_xp").get();
-//                    redeemable = Math.min(redeemable, maxxp-storedxp);
 
                     if (storedxp < maxxp) {
                         int roomInBottle = maxxp - storedxp;
