@@ -21,6 +21,9 @@ public class ConfigModel {
     @RangeConstraint(min = 0, max = 100)
     public int xp_percentage_on_death = 50;
 
+    @Comment("Enable or disable the toggle-repair feature")
+    public boolean toggle_repair_enabled = true;
+
     public static boolean isInRange(int value) {
         return value > 0 && value <= 10000000;
     }

@@ -75,23 +75,28 @@ public class Events {
                         )
                     )
                 )
-
-                .then(CommandManager.literal("toggle-repair")
-                    .executes(context -> {
-                        ServerPlayerEntity  player = context.getSource().getPlayer();
-                         if (player != null) {
-                             repair_enabled.put(player.getUuid(), !repair_enabled.getOrDefault(player.getUuid(), true));
-                             if (repair_enabled.get(player.getUuid())){
-                                player.sendMessage(Text.literal("Repair ").append(Text.literal("Enabled").formatted(Formatting.GREEN)));
-                             } else {
-                                player.sendMessage(Text.literal("Repair ").append(Text.literal("Disabled").formatted(Formatting.RED)));
-                             }
-                             return 1;
-                         }
-                         return 0;
-                    })
-                )
             );
+
+            if (RedeemXP.CONFIG.toggle_repair_enabled()){
+                dispatcher.register(CommandManager.literal("redeemxp")
+                    .requires(source -> true)
+                    .then(CommandManager.literal("toggle-repair")
+                        .executes(context -> {
+                            ServerPlayerEntity  player = context.getSource().getPlayer();
+                             if (player != null) {
+                                 repair_enabled.put(player.getUuid(), !repair_enabled.getOrDefault(player.getUuid(), true));
+                                 if (repair_enabled.get(player.getUuid())){
+                                    player.sendMessage(Text.literal("Repair ").append(Text.literal("Enabled").formatted(Formatting.GREEN)));
+                                 } else {
+                                    player.sendMessage(Text.literal("Repair ").append(Text.literal("Disabled").formatted(Formatting.RED)));
+                                 }
+                                 return 1;
+                             }
+                             return 0;
+                        })
+                    )
+                );
+            }
         });
 
         UseItemCallback.EVENT.register((player, world, hand) -> {

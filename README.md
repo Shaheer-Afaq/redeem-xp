@@ -26,7 +26,7 @@ Run `/redeemxp info totalxp` to get your total xp points.
 
 Run `/redeemxp info xplevels <levels>` to get the xp points required to reach that level.
 
-Run `/redeemxp toggle-repair` to toggle between whether xp orbs repair items with mending **or** increase the player's xp.
+Run `/redeemxp toggle-repair` to toggle between whether xp orbs repair items with mending **or** increase the player's xp. (This feature can be disabled in the config)
 
 ---
 For the config file to appear load and run the mod once, then u can change the values in `/config/redeemxp.json5`
