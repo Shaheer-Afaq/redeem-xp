@@ -24,32 +24,32 @@ import static redeemxp.Manager.*;
 public class Events {
     public static void register(){
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(CommandManager.literal("redeem")
-                    .requires(source -> true)
-                    .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
-                        .then(CommandManager.literal("xp")
-                            .executes(context -> {
-                                int amount = IntegerArgumentType.getInteger(context, "amount");
-                                return redeem(context, amount);
-                            })
-                        )
-                    )
-                    .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
-                        .then(CommandManager.literal("levels")
-                            .executes(context -> {
-                                ServerPlayerEntity  player = context.getSource().getPlayer();
-                                assert player != null;
-                                int amount = IntegerArgumentType.getInteger(context, "amount");
-                                int currentLevels = player.experienceLevel;
-                                int xp = getTotalXp(currentLevels, player.experienceProgress) - getTotalXp(currentLevels-amount, player.experienceProgress);
-                                return redeem(context, xp);
-                            })
-                        )
-                    )
-                    .then(CommandManager.literal("max").executes(context-> redeem(context, RedeemXP.CONFIG.max_xp())))
-            );
-            dispatcher.register(CommandManager.literal("xpinfo")
+            dispatcher.register(CommandManager.literal("redeemxp")
                 .requires(source -> true)
+
+                .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
+                    .then(CommandManager.literal("xp")
+                        .executes(context -> {
+                            int amount = IntegerArgumentType.getInteger(context, "amount");
+                            return redeem(context, amount);
+                        })
+                    )
+                )
+                .then(CommandManager.argument("amount", IntegerArgumentType.integer(1))
+                    .then(CommandManager.literal("levels")
+                        .executes(context -> {
+                            ServerPlayerEntity  player = context.getSource().getPlayer();
+                            assert player != null;
+                            int amount = IntegerArgumentType.getInteger(context, "amount");
+                            int currentLevels = player.experienceLevel;
+                            int xp = getTotalXp(currentLevels, player.experienceProgress) - getTotalXp(currentLevels-amount, player.experienceProgress);
+                            return redeem(context, xp);
+                        })
+                    )
+                )
+                .then(CommandManager.literal("max").executes(context-> redeem(context, RedeemXP.CONFIG.max_xp())))
+
+                .then(CommandManager.literal("info")
                     .then(CommandManager.literal("totalxp")
                         .executes(context->{
                             ServerPlayerEntity  player = context.getSource().getPlayer();
@@ -74,6 +74,23 @@ public class Events {
                             })
                         )
                     )
+                )
+
+                .then(CommandManager.literal("toggle-repair")
+                    .executes(context -> {
+                        ServerPlayerEntity  player = context.getSource().getPlayer();
+                         if (player != null) {
+                             repair_enabled.put(player.getUuid(), !repair_enabled.getOrDefault(player.getUuid(), true));
+                             if (repair_enabled.get(player.getUuid())){
+                                player.sendMessage(Text.literal("Repair ").append(Text.literal("Enabled").formatted(Formatting.GREEN)));
+                             } else {
+                                player.sendMessage(Text.literal("Repair ").append(Text.literal("Disabled").formatted(Formatting.RED)));
+                             }
+                             return 1;
+                         }
+                         return 0;
+                    })
+                )
             );
         });
 

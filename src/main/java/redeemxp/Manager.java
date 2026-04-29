@@ -6,17 +6,19 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static redeemxp.RedeemXP.MOD_ID;
 
@@ -25,6 +27,8 @@ public class Manager {
     public static MinecraftServer getServer(){return Server;}
 
     public static final AttachmentType<Integer> ENTITY_STOREDXP = AttachmentRegistry.create(Identifier.of(MOD_ID, "stored_xp"));
+
+    public static final Map<UUID, Boolean> repair_enabled = new HashMap<>();
 
     public static void init() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
