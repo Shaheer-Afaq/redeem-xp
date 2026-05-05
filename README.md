@@ -19,6 +19,11 @@ If u sneak while right-clicking u can get all the xp at once.
 The stored xp can be monitored by the durability bar or the description.
 
 ---
+Run `/redeemxp quickmend` to toggle quick mend feature. When its enabled, open inventory and hover over an item with mending and press offhand key to mend that item using the players xp.
+
+Amount in percentage of each mend can be configured. For balance, a penalty multiplier  can also be configured to increase the use of xp. For example `"quickmend_penalty": 2` means double the xp will be used.
+
+---
 On death, the player drops a bottle containing a fraction of their xp. This can be configured under `xp_percentage_on_death : 50`.
 
 ---
@@ -44,10 +49,21 @@ If you are on singleplayer you can use Mod Menu to configure the values.
 
 `/redeemxp info xplevels <levels>`
 
+`/redeemxp quickmend`
+
 `/redeemxp toggle-repair`
 
-`xp_rate : 10`
+---
+`"max_xp" : 1395`
 
-`max_xp : 1395`
+`"xp_rate" : 10`
 
-`xp_percentage_on_death : 50`
+`"quick_mend_enabled": true`
+
+`"quickmend_percentage": 10`
+
+`"quickmend_penalty": 1.5`
+
+`"xp_percentage_on_death" : 50`
+
+`"toggle_repair_enabled": true`
