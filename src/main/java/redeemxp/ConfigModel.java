@@ -17,12 +17,19 @@ public class ConfigModel {
     @PredicateConstraint("isInRange")
     public int xp_rate = 20;
 
+    @Comment("Percentage durability restored with quick-mend")
+    @RangeConstraint(min = 1, max = 100)
+    public int quickmend_percentage = 10;
+
     @Comment("How much xp is conserved in a bottle on death")
     @RangeConstraint(min = 0, max = 100)
     public int xp_percentage_on_death = 50;
 
     @Comment("Enable or disable the toggle-repair feature")
     public boolean toggle_repair_enabled = true;
+
+    @Comment("Enable or disable the quick-mend feature")
+    public boolean quick_mend_enabled = true;
 
     public static boolean isInRange(int value) {
         return value > 0 && value <= 10000000;

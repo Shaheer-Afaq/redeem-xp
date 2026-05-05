@@ -97,6 +97,28 @@ public class Events {
                     )
                 );
             }
+            if (RedeemXP.CONFIG.toggle_repair_enabled()) {
+                dispatcher.register(CommandManager.literal("redeemxp")
+                    .requires(source -> true)
+                    .then(CommandManager.literal("quickmend")
+                        .executes(context -> {
+                            ServerPlayerEntity  player = context.getSource().getPlayer();
+                            if (player != null) {
+                                boolean enabled = !quickmend_enabled.getOrDefault(player.getUuid(), false);
+                                quickmend_enabled.put(player.getUuid(), enabled);
+                                if (enabled) {
+                                    player.sendMessage(Text.literal("Quick-Mend").append(Text.literal("Enabled").formatted(Formatting.GREEN)));
+                                }
+                                else{
+                                    player.sendMessage(Text.literal("Quick-Mend").append(Text.literal("Disabled").formatted(Formatting.RED)));
+                                }
+                                return 1;
+                            }
+                            return 0;
+                        })
+                    )
+                );
+            }
         });
 
         UseItemCallback.EVENT.register((player, world, hand) -> {
@@ -137,5 +159,6 @@ public class Events {
             }
             return ActionResult.PASS;
         });
+
     }
 }

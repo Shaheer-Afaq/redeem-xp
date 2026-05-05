@@ -29,6 +29,7 @@ public class Manager {
     public static final AttachmentType<Integer> ENTITY_STOREDXP = AttachmentRegistry.create(Identifier.of(MOD_ID, "stored_xp"));
 
     public static final Map<UUID, Boolean> repair_enabled = new HashMap<>();
+    public static final Map<UUID, Boolean> quickmend_enabled = new HashMap<>();
 
     public static void init() {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
