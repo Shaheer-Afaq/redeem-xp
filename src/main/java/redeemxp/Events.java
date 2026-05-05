@@ -107,10 +107,10 @@ public class Events {
                                 boolean enabled = !quickmend_enabled.getOrDefault(player.getUuid(), false);
                                 quickmend_enabled.put(player.getUuid(), enabled);
                                 if (enabled) {
-                                    player.sendMessage(Text.literal("Quick-Mend").append(Text.literal("Enabled").formatted(Formatting.GREEN)));
+                                    player.sendMessage(Text.literal("Quick-Mend ").append(Text.literal("Enabled").formatted(Formatting.GREEN)));
                                 }
                                 else{
-                                    player.sendMessage(Text.literal("Quick-Mend").append(Text.literal("Disabled").formatted(Formatting.RED)));
+                                    player.sendMessage(Text.literal("Quick-Mend ").append(Text.literal("Disabled").formatted(Formatting.RED)));
                                 }
                                 return 1;
                             }

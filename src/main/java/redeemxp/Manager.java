@@ -6,12 +6,18 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -111,5 +117,11 @@ public class Manager {
         int xpFromProgress = (int) (progress * nextLevelExperience);
 
         return (int) Math.min(xpFromLevels + xpFromProgress, Integer.MAX_VALUE);
+    }
+
+    public static void sendSound(PlayerEntity player, SoundEvent sound) {
+        ((ServerPlayerEntity) player).networkHandler.sendPacket(
+                new PlaySoundS2CPacket(RegistryEntry.of(sound),
+                        SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 1.0f, 1.0f, 0L));
     }
 }
